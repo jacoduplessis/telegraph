@@ -2,7 +2,11 @@
 
 ### Python wrapper for the Telegraph blogging service provided by Telegram
 
-Work in progress. No tests yet.
+Work in progress. No tests yet. Requires Python 3.
+
+### Documentation
+
+The docs are hosted on [RTD](http://telegraph.readthedocs.io/en/latest/).
 
 ### Usage
 
