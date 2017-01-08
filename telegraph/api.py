@@ -1,9 +1,4 @@
 import requests
-import logging
-
-logger = logging.getLogger('telegraph')
-logger.setLevel(logging.DEBUG)
-logger.addHandler(logging.StreamHandler())
 
 
 class TelegraphException(Exception):
@@ -41,7 +36,6 @@ class Telegraph:
             kwargs.update({'access_token': self.token})
 
         url = base_url + method
-        logger.debug("Making request to {}, with params {}".format(url, kwargs))
 
         r = requests.post(url, json=kwargs)
         r.raise_for_status()
