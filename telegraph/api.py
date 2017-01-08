@@ -83,7 +83,13 @@ class Telegraph:
             Can be any link, not necessarily to a Telegram profile or channel.
         :return: A dict representing an Account with the default fields.
         """
-        pass
+        params = {
+            'short_name': short_name,
+            'author_name': author_name,
+            'author_url': author_url
+        }
+
+        return self._request('editAccountInfo', **params)
 
     def get_account_info(self, fields=None):
         """
@@ -111,9 +117,10 @@ class Telegraph:
 
         See `<http://telegra.ph/api#revokeAccessToken>`_.
 
-        :return:
+        :return: A dict representing an Account with new ``access_token`` and ``auth_url`` fields.
         """
-        pass
+        result = self._request('revokeAccessToken').get('result')
+        return result
 
     def create_page(self, title, content=None, author_name=None, author_url=None, return_content=False):
         """
@@ -174,7 +181,7 @@ class Telegraph:
         See `<http://telegra.ph/api#getPage>`_.
 
         :param path: Required. Path to the Telegraph page (in the format Title-12-31,
-            i.e. everything that comes after http://telegra.ph/).
+            i.e. everything that comes after ``http://telegra.ph/``).
         :param return_content: If true, content field will be returned in Page object. Default is ``False``.
         :return: A Page object.
         """

@@ -12,10 +12,3 @@ Welcome to Telegraph's documentation!
 
 .. autoclass:: telegraph.api.Telegraph
     :members:
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
