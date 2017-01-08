@@ -1,8 +1,10 @@
 # Telegraph
 
+[![Documentation Status](https://readthedocs.org/projects/telegraph/badge/?version=latest)](http://telegraph.readthedocs.io/en/latest/?badge=latest)
+
 ### Python wrapper for the Telegraph blogging service provided by Telegram
 
-Work in progress. No tests yet. Requires Python 3.
+Requires Python 3.
 
 ### Documentation
 
