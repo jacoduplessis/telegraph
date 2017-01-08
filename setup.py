@@ -6,6 +6,6 @@ setup(
     packages=['telegraph'],
     include_package_data=True,
     install_requires=[
-        'requests==2.12.4'
+        'requests'
     ],
 )
