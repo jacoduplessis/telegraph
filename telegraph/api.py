@@ -25,7 +25,7 @@ class Page:
         self.can_edit = can_edit
 
     def __str__(self):
-        return f"<Telegraph Page: {self.title} ({self.path})"
+        return "<Telegraph Page: {} ({})".format(self.title, self.path)
 
 
 class Telegraph:
@@ -46,7 +46,7 @@ class Telegraph:
             params = kwargs
 
         url = base_url + method
-        logger.debug(f"Making request to {url}, with params f{params}")
+        logger.debug("Making request to {}, with params {}".format(url, params))
 
         r = requests.post(url, json=params)
         r.raise_for_status()
