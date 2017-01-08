@@ -10,6 +10,10 @@ Requires Python 3.
 
 The docs are hosted on [RTD](http://telegraph.readthedocs.io/en/latest/).
 
+### Install
+
+`pip install git+https://github.com/jacoduplessis/telegraph`
+
 ### Usage
 
 ```python
