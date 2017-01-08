@@ -38,17 +38,12 @@ class Telegraph:
         base_url = 'https://api.telegra.ph/'
 
         if method != 'createAccount':
-            params = {
-                'access_token': self.token,
-                **kwargs
-            }
-        else:
-            params = kwargs
+            kwargs.update({'access_token': self.token})
 
         url = base_url + method
-        logger.debug("Making request to {}, with params {}".format(url, params))
+        logger.debug("Making request to {}, with params {}".format(url, kwargs))
 
-        r = requests.post(url, json=params)
+        r = requests.post(url, json=kwargs)
         r.raise_for_status()
         response = r.json()
         if not response['ok']:
