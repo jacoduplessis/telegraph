@@ -1,6 +1,7 @@
 from unittest import TestCase, main
+
 from telegraph.utils import content_to_html, html_to_content
-from fixtures import CONTENT, HTML
+from .fixtures import CONTENT, HTML
 
 
 class TestUtils(TestCase):

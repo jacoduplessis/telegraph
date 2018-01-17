@@ -1,6 +1,8 @@
-from telegraph import Telegraph
 from unittest import TestCase, main
-from fixtures import CONTENT
+
+from telegraph import Telegraph
+from .fixtures import CONTENT
+
 
 class TestAPI(TestCase):
 
@@ -11,10 +13,8 @@ class TestAPI(TestCase):
         self.t.close()
 
     def test_get_page(self):
-
         page = self.t.get_page('api')
         self.assertEqual(page.title, 'Telegraph API')
-
 
     def test_create_page(self):
         page = self.t.create_page(

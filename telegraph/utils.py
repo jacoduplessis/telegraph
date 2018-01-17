@@ -1,7 +1,7 @@
-from bs4 import BeautifulSoup, NavigableString
-import bleach
-
 from xml.dom.minidom import Document
+
+import bleach
+from bs4 import BeautifulSoup
 
 ALLOWED_TAGS = [
     'a', 'aside', 'b', 'blockquote', 'br', 'code', 'em', 'figcaption',
@@ -20,8 +20,8 @@ ALLOWED_ATTRIBUTES = {
 
 
 def html_to_content(html):
-
-    clean = bleach.clean(html, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True, strip_comments=True).strip()
+    clean = bleach.clean(html, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True,
+                         strip_comments=True).strip()
     soup = BeautifulSoup(clean, "html.parser")
 
     def inner(tag):
@@ -48,8 +48,6 @@ def html_to_content(html):
                     child_list.append(result)
             node['children'] = child_list
 
-
-
         return node
 
     # return the children of the root document as final result
@@ -57,7 +55,6 @@ def html_to_content(html):
 
 
 def content_to_html(content):
-
     document = Document()
 
     root = document.createElement('div')
@@ -73,7 +70,7 @@ def content_to_html(content):
             for name, value in node['attrs'].items():
                 dom_node.setAttribute(name, value)
 
-        if 'children'in node:
+        if 'children' in node:
             for child in node['children']:
                 dom_node.appendChild(inner(child))
 
