@@ -27,24 +27,27 @@ class Telegraph:
     def __init__(self, token=None):
 
         self.token = token
+        self.session = requests.Session()
 
     def _request(self, method, **kwargs):
 
         base_url = 'https://api.telegra.ph/'
 
         if method != 'createAccount':
+            if not self.token:
+                raise RuntimeError("No Access Token provided for Telegraph instance.")
             kwargs.update({'access_token': self.token})
 
         url = base_url + method
 
-        r = requests.post(url, json=kwargs)
+        r = self.session.post(url, json=kwargs, timeout=5)
         r.raise_for_status()
         response = r.json()
         if not response['ok']:
             raise TelegraphException(response['error'])
         return r.json()
 
-    def create_account(self, short_name, author_name=None, author_url=None):
+    def create_account(self, short_name, author_name=None, author_url=None, use=True):
         """
         Use this method to create a new Telegraph account.
 
@@ -56,6 +59,7 @@ class Telegraph:
         :param author_name: Default author name used when creating new articles.
         :param author_url: Default profile link, opened when users click on the author's name below the title.
             Can be any link, not necessarily to a Telegram profile or channel.
+        :param use: Whether to set the access token of the current instance to the new account. Default: True
         :return: Dict containing account fields as well as ``access_token``.
         """
         params = {
@@ -63,7 +67,12 @@ class Telegraph:
             'author_name': author_name,
             'author_url': author_url
         }
-        return self._request('createAccount', **params)
+
+        response = self._request('createAccount', **params)
+        if use:
+            self.token = response['result']['access_token']
+        return response
+
 
     def edit_account_info(self, short_name=None, author_name=None, author_url=None):
         """
@@ -226,3 +235,6 @@ class Telegraph:
             'hour': hour
         }
         return self._request('getViews', **params).get('result')
+
+    def close(self):
+        self.session.close()
