@@ -4,7 +4,7 @@
 
 ### Python wrapper for the Telegraph blogging service provided by Telegram
 
-Requires Python 3.
+Requires Python 3.6+.
 
 ### Documentation
 

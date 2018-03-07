@@ -1,7 +1,7 @@
 from unittest import TestCase, main
 
 from telegraph import Telegraph
-from .fixtures import CONTENT
+from fixtures import CONTENT
 
 
 class TestAPI(TestCase):

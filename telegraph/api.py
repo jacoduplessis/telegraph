@@ -1,26 +1,40 @@
 import requests
+from typing import NamedTuple, List, Dict, Union
+
+
+class Account(NamedTuple):
+    short_name: str = ''
+    author_name: str = ''
+    author_url: str = ''
+    access_token: str = None
+    auth_url: str = None
+    page_count: int = None
+
+
+class Page(NamedTuple):
+    path: str
+    url: str
+    title: str
+    description: str
+    views: int
+    author_name: str = None
+    author_url: str = None
+    image_url: str = None
+    content: List = None
+    can_edit: bool = None
+
+
+class PageViews(NamedTuple):
+    views: int
+
+
+class PageList(NamedTuple):
+    total_count: int
+    pages: List[Page]
 
 
 class TelegraphException(Exception):
     pass
-
-
-class Page:
-    def __init__(self, path='', url='', title='', description='', author_name='',
-                 author_url='', views='', image_url=None, content=None, can_edit=None):
-        self.path = path
-        self.url = url
-        self.title = title
-        self.description = description
-        self.author_name = author_name
-        self.author_url = author_url
-        self.image_url = image_url
-        self.content = content
-        self.views = views
-        self.can_edit = can_edit
-
-    def __str__(self):
-        return "<Telegraph Page: {} ({})".format(self.title, self.path)
 
 
 class Telegraph:
@@ -35,17 +49,19 @@ class Telegraph:
 
         if method != 'createAccount':
             if not self.token:
-                raise RuntimeError("No Access Token provided for Telegraph instance.")
+                raise TelegraphException("No Access Token provided for Telegraph instance.")
             kwargs.update({'access_token': self.token})
 
         url = base_url + method
-
-        r = self.session.post(url, json=kwargs, timeout=5)
-        r.raise_for_status()
+        try:
+            r = self.session.post(url, json=kwargs, timeout=5)
+            r.raise_for_status()
+        except requests.RequestException as e:
+            raise Telegraph(f'Connection Error: {e}')
         response = r.json()
         if not response['ok']:
-            raise TelegraphException(response['error'])
-        return r.json()
+            raise TelegraphException(f'API Error: {response["error"]}')
+        return response.get('result')
 
     def create_account(self, short_name, author_name=None, author_url=None, use=True):
         """
@@ -68,13 +84,16 @@ class Telegraph:
             'author_url': author_url
         }
 
-        response = self._request('createAccount', **params)
+        data = self._request('createAccount', **params)
+        account = Account(**data)
         if use:
-            self.token = response['result']['access_token']
-        return response
+            self.token = account.access_token
+        return account
 
-
-    def edit_account_info(self, short_name=None, author_name=None, author_url=None):
+    def edit_account_info(self,
+                          short_name=None,
+                          author_name=None,
+                          author_url=None) -> Account:
         """
         Use this method to get information about a Telegraph account.
 
@@ -84,7 +103,7 @@ class Telegraph:
         :param author_name: New default author name used when creating new articles.
         :param author_url: New default profile link, opened when users click on the author's name below the title.
             Can be any link, not necessarily to a Telegram profile or channel.
-        :return: A dict representing an Account with the default fields.
+        :return: An Account object.
         """
         params = {
             'short_name': short_name,
@@ -92,9 +111,12 @@ class Telegraph:
             'author_url': author_url
         }
 
-        return self._request('editAccountInfo', **params)
+        data = self._request('editAccountInfo', **params)
+        account = Account(**data)
+        return account
 
-    def get_account_info(self, fields=None):
+    def get_account_info(self,
+                         fields: List[str] = None) -> Account:
         """
         Use this method to get information about a Telegraph account.
 
@@ -103,16 +125,18 @@ class Telegraph:
         :param fields: List of account fields to return.
             Available fields: ``short_name``, ``author_name``, ``author_url``, ``auth_url``, ``page_count``.
             Default is ``["short_name", "author_name", "author_url"]``.
-        :return: A dict with the Account info.
+        :return: An Account object.
         """
         if fields is None:
             fields = ['short_name', 'author_name', 'author_url']
         elif fields == 'all':
             fields = ['short_name', 'author_name', 'author_url', 'auth_url', 'page_count']
         params = dict(fields=fields)
-        return self._request('getAccountInfo', **params)
+        data = self._request('getAccountInfo', **params)
+        account = Account(**data)
+        return account
 
-    def revoke_access_token(self):
+    def revoke_access_token(self) -> Account:
         """
         Use this method to revoke access_token and generate a new one, for example,
             if the user would like to reset all connected sessions,
@@ -120,12 +144,18 @@ class Telegraph:
 
         See `<http://telegra.ph/api#revokeAccessToken>`_.
 
-        :return: A dict representing an Account with new ``access_token`` and ``auth_url`` fields.
+        :return: An Account object with new ``access_token`` and ``auth_url`` fields.
         """
-        result = self._request('revokeAccessToken').get('result')
-        return result
+        data = self._request('revokeAccessToken')
+        account = Account(**data)
+        return account
 
-    def create_page(self, title, content=None, author_name=None, author_url=None, return_content=False):
+    def create_page(self,
+                    title: str,
+                    content: List[Union[Dict, str]] = None,
+                    author_name: str = None,
+                    author_url: str = None,
+                    return_content: bool = False) -> Page:
         """
         Use this method to create a new Telegraph page.
 
@@ -141,16 +171,22 @@ class Telegraph:
         """
         params = {
             'title': title,
-            'content': content or ['...'],
+            'content': content,
             'author_name': author_name,
             'author_url': author_url,
             'return_content': return_content
         }
-        result = self._request('createPage', **params).get('result')
-        page = Page(**result)
+        data = self._request('createPage', **params)
+        page = Page(**data)
         return page
 
-    def edit_page(self, path, title, content, author_name=None, author_url=None, return_content=False):
+    def edit_page(self,
+                  path: str,
+                  title: str,
+                  content: List[Union[Dict, str]],
+                  author_name: str = None,
+                  author_url: str = None,
+                  return_content: bool = False) -> Page:
         """
         Use this method to edit an existing Telegraph page.
 
@@ -173,11 +209,13 @@ class Telegraph:
             'author_url': author_url,
             'return_content': return_content
         }
-        result = self._request('editPage', **params).get('result')
-        page = Page(**result)
+        data = self._request('editPage', **params)
+        page = Page(**data)
         return page
 
-    def get_page(self, path, return_content=False):
+    def get_page(self,
+                 path: str,
+                 return_content=False) -> Page:
         """
         Use this method to get a Telegraph page.
 
@@ -189,11 +227,13 @@ class Telegraph:
         :return: A Page object.
         """
         params = dict(path=path, return_content=return_content)
-        result = self._request('getPage', **params).get('result')
-        page = Page(**result)
+        data = self._request('getPage', **params)
+        page = Page(**data)
         return page
 
-    def get_page_list(self, offset=0, limit=50):
+    def get_page_list(self,
+                      offset: int = 0,
+                      limit: int = 50):
         """
         Use this method to get a list of pages belonging to a Telegraph account.
 
@@ -201,15 +241,20 @@ class Telegraph:
 
         :param offset: Sequential number of the first page to be returned. Default is 0.
         :param limit: Limits the number of pages to be retrieved. Default is 50.
-        :return: Dict with two keys: ``total_count`` with the total number of pages beloning to the account,
-            and ``pages`` that is a list of ``Page`` objects.
+        :return: A PageList object.
         """
         params = dict(offset=offset, limit=limit)
-        result = self._request('getPageList', **params).get('result')
-        pages = [Page(**page) for page in result['pages']]
-        return dict(total_count=result['total_count'], pages=pages)
+        data = self._request('getPageList', **params)
+        total_count = data['total_count']
+        pages = [Page(**page) for page in data['pages']]
+        return PageList(pages=pages, total_count=total_count)
 
-    def get_views(self, path, year=None, month=None, day=None, hour=None):
+    def get_views(self,
+                  path: str,
+                  year: int = None,
+                  month: int = None,
+                  day: int = None,
+                  hour: int = None) -> PageViews:
         """
         Use this method to get the number of views for a Telegraph article.
 
@@ -224,8 +269,7 @@ class Telegraph:
         :param day: Required if hour is passed.
             If passed, the number of page views for the requested day will be returned.
         :param hour: If passed, the number of page views for the requested hour will be returned.
-        :return: Dict with a single ``views`` key and an integer value.
-            By default, the total number of page views will be returned.
+        :return A PageViews object.
         """
         params = {
             'path': path,
@@ -234,7 +278,8 @@ class Telegraph:
             'day': day,
             'hour': hour
         }
-        return self._request('getViews', **params).get('result')
+        data = self._request('getViews', **params)
+        return PageViews(**data)
 
     def close(self):
         self.session.close()
