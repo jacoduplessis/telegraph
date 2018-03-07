@@ -6,9 +6,22 @@
 
 Requires Python 3.6+.
 
+A more-or-less direct mapping to the [Telegraph API](http://telegra.ph/api),
+with `snake_case` instead of `camelCase`.
+
 ### Documentation
 
-The docs are hosted on [RTD](http://telegraph.readthedocs.io/en/latest/).
+The documentation on [RTD](http://telegraph.readthedocs.io/en/latest/) is broken until they support Python3.6.
+
+To build and view the docs locally:
+
+```
+pip install sphynx
+cd docs
+make html
+cd build
+python -m http.server 8010
+```
 
 ### Install
 
@@ -22,10 +35,15 @@ from telegraph import Telegraph
 telegraph = Telegraph('<access_token>')
 
 # Get Pages
-pages = telegraph.get_page_list()
-
+page_list = telegraph.get_page_list(offset=0, limit=100)
+num_pages = page_list.total_count
+for page in page_list.pages:
+    # do something with page
+    pass
+    
 # Create Page
-page = telegraph.create_page(title="New Page", content=['Lorem Ipsum'])
+new_page = telegraph.create_page(title="New Page", content=['Lorem Ipsum'])
+assert new_page.title == "New Page"
 ```
 
 ### Utilities
