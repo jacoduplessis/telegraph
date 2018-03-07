@@ -10,5 +10,15 @@ Welcome to Telegraph's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+API
+---
+
 .. autoclass:: telegraph.api.Telegraph
     :members:
+
+Types
+-----
+
+.. automodule:: telegraph.types
+    :members:
+

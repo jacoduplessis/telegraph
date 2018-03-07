@@ -1,36 +1,7 @@
 import requests
-from typing import NamedTuple, List, Dict, Union
+from typing import List, Dict, Union
 
-
-class Account(NamedTuple):
-    short_name: str = ''
-    author_name: str = ''
-    author_url: str = ''
-    access_token: str = None
-    auth_url: str = None
-    page_count: int = None
-
-
-class Page(NamedTuple):
-    path: str
-    url: str
-    title: str
-    description: str
-    views: int
-    author_name: str = None
-    author_url: str = None
-    image_url: str = None
-    content: List = None
-    can_edit: bool = None
-
-
-class PageViews(NamedTuple):
-    views: int
-
-
-class PageList(NamedTuple):
-    total_count: int
-    pages: List[Page]
+from .types import Account, Page, PageViews, PageList
 
 
 class TelegraphException(Exception):
@@ -76,7 +47,8 @@ class Telegraph:
         :param author_url: Default profile link, opened when users click on the author's name below the title.
             Can be any link, not necessarily to a Telegram profile or channel.
         :param use: Whether to set the access token of the current instance to the new account. Default: True
-        :return: Dict containing account fields as well as ``access_token``.
+        :return: An Account object.
+        :rtype: Account
         """
         params = {
             'short_name': short_name,
@@ -104,6 +76,7 @@ class Telegraph:
         :param author_url: New default profile link, opened when users click on the author's name below the title.
             Can be any link, not necessarily to a Telegram profile or channel.
         :return: An Account object.
+        :rtype: Account
         """
         params = {
             'short_name': short_name,
@@ -126,6 +99,7 @@ class Telegraph:
             Available fields: ``short_name``, ``author_name``, ``author_url``, ``auth_url``, ``page_count``.
             Default is ``["short_name", "author_name", "author_url"]``.
         :return: An Account object.
+        :rtype: Account
         """
         if fields is None:
             fields = ['short_name', 'author_name', 'author_url']
@@ -145,6 +119,7 @@ class Telegraph:
         See `<http://telegra.ph/api#revokeAccessToken>`_.
 
         :return: An Account object with new ``access_token`` and ``auth_url`` fields.
+        :rtype: Account
         """
         data = self._request('revokeAccessToken')
         account = Account(**data)
@@ -168,6 +143,7 @@ class Telegraph:
             Can be any link, not necessarily to a Telegram profile or channel.
         :param return_content: If true, a content field will be returned in the Page object.
         :return: A Page object.
+        :rtype: Page
         """
         params = {
             'title': title,
@@ -200,6 +176,7 @@ class Telegraph:
             Can be any link, not necessarily to a Telegram profile or channel.
         :param return_content: If true, a content field will be returned in the Page object.
         :return: A Page object.
+        :rtype: Page
         """
         params = {
             'path': path,
@@ -225,6 +202,7 @@ class Telegraph:
             i.e. everything that comes after ``http://telegra.ph/``).
         :param return_content: If true, content field will be returned in Page object. Default is ``False``.
         :return: A Page object.
+        :rtype: Page
         """
         params = dict(path=path, return_content=return_content)
         data = self._request('getPage', **params)
@@ -242,6 +220,7 @@ class Telegraph:
         :param offset: Sequential number of the first page to be returned. Default is 0.
         :param limit: Limits the number of pages to be retrieved. Default is 50.
         :return: A PageList object.
+        :rtype: PageList
         """
         params = dict(offset=offset, limit=limit)
         data = self._request('getPageList', **params)
@@ -269,7 +248,8 @@ class Telegraph:
         :param day: Required if hour is passed.
             If passed, the number of page views for the requested day will be returned.
         :param hour: If passed, the number of page views for the requested hour will be returned.
-        :return A PageViews object.
+        :return: A PageViews object.
+        :rtype: PageViews
         """
         params = {
             'path': path,
