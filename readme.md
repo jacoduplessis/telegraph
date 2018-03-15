@@ -11,7 +11,7 @@ with `snake_case` instead of `camelCase`.
 
 ### Documentation
 
-The documentation on [RTD](http://telegraph.readthedocs.io/en/latest/) is broken until they support Python3.6.
+The documentation on [RTD](https://telegraph.readthedocs.io/en/latest/) is broken until they support Python3.6.
 
 To build and view the docs locally:
 
@@ -25,23 +25,26 @@ python -m http.server 8010
 
 ### Install
 
-`pip install git+https://github.com/jacoduplessis/telegraph`
+`pip install telegraph_client`
 
 ### Usage
 
 ```python
 from telegraph import Telegraph
 
+# using existing account
 telegraph = Telegraph('<access_token>')
+# or with new account
+account = telegraph.create_account(short_name='Ludo Loeloeraai', use=True)
+# set use=False if using an authenticated client to create new accounts without switching to them
 
-# Get Pages
+# get pages
 page_list = telegraph.get_page_list(offset=0, limit=100)
 num_pages = page_list.total_count
 for page in page_list.pages:
-    # do something with page
-    pass
+    print(page.title, page.url)
     
-# Create Page
+# create page
 new_page = telegraph.create_page(title="New Page", content=['Lorem Ipsum'])
 assert new_page.title == "New Page"
 ```
@@ -61,7 +64,7 @@ from telegraph.utils import content_to_html, html_to_content
 telegraph = Telegraph('<access_token>')
 
 # rendering page content as html
-page = telegraph.get_page('path')
+page = telegraph.get_page('<path>')
 html = content_to_html(page.content)
 
 # creating a page from html string
