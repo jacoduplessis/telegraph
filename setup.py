@@ -16,14 +16,13 @@ setup(
         'Source': github,
         'Tracker': f'{github}/issues',
     },
-    version='0.1.0',
+    version='0.2.0',
     packages=['telegraph'],
     install_requires=[
         'requests'
     ],
     python_requires='>=3.6',
     classifiers=[
-        'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3',
