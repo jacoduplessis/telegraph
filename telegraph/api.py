@@ -9,9 +9,10 @@ class TelegraphException(Exception):
 
 
 class Telegraph:
-    def __init__(self, token=None):
+    def __init__(self, token=None, timeout=5):
 
         self.token = token
+        self.timeout = timeout
         self.session = requests.Session()
 
     def _request(self, method, **kwargs):
@@ -25,10 +26,10 @@ class Telegraph:
 
         url = base_url + method
         try:
-            r = self.session.post(url, json=kwargs, timeout=5)
+            r = self.session.post(url, json=kwargs, timeout=self.timeout)
             r.raise_for_status()
         except requests.RequestException as e:
-            raise Telegraph(f'Connection Error: {e}')
+            raise TelegraphException(f'Connection Error: {e}')
         response = r.json()
         if not response['ok']:
             raise TelegraphException(f'API Error: {response["error"]}')
